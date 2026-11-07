@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Career Payback Race</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Compare lifetime earnings against education costs and student-loan repayment for eight US careers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">US careers · ages 18 to 65 · 2025 dollars</p>
+    <h1>Who comes out ahead by&nbsp;65?</h1>
+    <p class="lede">Pick up to three careers. See what school costs, how long the loans take to repay, and how much each path has earned once the debt is gone.</p>
+  </header>
+
+  <section class="panel picker" aria-labelledby="picker-title">
+    <div class="section-head">
+      <h2 id="picker-title">Careers</h2>
+      <p class="hint" id="picker-hint" aria-live="polite">3 of 3 selected</p>
+    </div>
+    <div class="career-grid" id="career-grid" role="group" aria-label="Choose up to three careers"></div>
+  </section>
+
+  <section class="controls" aria-label="Assumptions">
+    <div class="control">
+      <span class="control-label" id="school-label">School type</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="school-label">
+        <button type="button" id="school-public" role="radio" data-school="public" aria-checked="true">Public in-state</button>
+        <button type="button" id="school-private" role="radio" data-school="private" aria-checked="false">Private</button>
+      </div>
+    </div>
+    <div class="control">
+      <label class="control-label" for="borrow">Tuition paid with loans <output id="borrow-out" for="borrow">100%</output></label>
+      <input type="range" id="borrow" min="0" max="100" step="10" value="100">
+    </div>
+    <div class="control">
+      <label class="control-label" for="repay">Loan repayment</label>
+      <select id="repay">
+        <option value="10" selected>10-year standard</option>
+        <option value="20">20-year</option>
+        <option value="25">25-year</option>
+      </select>
+    </div>
+    <div class="control">
+      <span class="control-label" id="tax-label">Earnings</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="tax-label">
+        <button type="button" id="tax-pre" role="radio" data-tax="pre" aria-checked="true">Before tax</button>
+        <button type="button" id="tax-post" role="radio" data-tax="post" aria-checked="false">After tax</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel race" aria-labelledby="race-title">
+    <div class="race-head">
+      <div>
+        <h2 id="race-title">Earnings race</h2>
+        <div class="segmented small" role="radiogroup" aria-label="Chart measure">
+          <button type="button" id="mode-net" role="radio" data-mode="net" aria-checked="true">Net earnings to date</button>
+          <button type="button" id="mode-annual" role="radio" data-mode="annual" aria-checked="false">Yearly pay</button>
+        </div>
+        <p class="chart-sub" id="chart-sub"></p>
+      </div>
+      <div class="age-readout" aria-live="off">
+        <span class="age-label">Age</span>
+        <span class="age-value" id="age-value">65</span>
+      </div>
+    </div>
+
+    <div class="chart-wrap" id="chart-wrap">
+      <svg id="chart" role="img" aria-labelledby="race-title chart-sub" tabindex="0"></svg>
+      <div class="tooltip" id="tooltip" hidden></div>
+    </div>
+
+    <div class="playbar">
+      <button type="button" class="play" id="play" aria-label="Play the race from age 18">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path id="play-icon" d="M4 2.5v11l9-5.5z"/></svg>
+        <span id="play-text">Run the race</span>
+      </button>
+      <input type="range" id="scrub" min="18" max="65" step="0.1" value="65" aria-label="Scrub through ages">
+      <select id="speed" aria-label="Playback speed">
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+      </select>
+    </div>
+
+    <div class="board" id="board" aria-label="Standings at the selected age"></div>
+    <p class="race-notes" id="race-notes"></p>
+  </section>
+
+  <section aria-labelledby="summary-title">
+    <div class="section-head">
+      <h2 id="summary-title">Side by side at 65</h2>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="table-title">
+    <div class="section-head">
+      <h2 id="table-title">All eight careers</h2>
+      <p class="hint">Uses the assumptions above. Select a column to sort.</p>
+    </div>
+    <div class="table-scroll">
+      <table id="table">
+        <thead>
+          <tr>
+            <th scope="col" data-sort="name" class="text">Career</th>
+            <th scope="col" data-sort="years">Years in school</th>
+            <th scope="col" data-sort="cost">Tuition &amp; fees</th>
+            <th scope="col" data-sort="start">Starting salary</th>
+            <th scope="col" data-sort="peak">Peak salary</th>
+            <th scope="col" data-sort="loan">Loan repaid</th>
+            <th scope="col" data-sort="net" aria-sort="descending">Net lifetime earnings</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="method" aria-labelledby="method-title">
+    <h2 id="method-title">Methodology &amp; sources</h2>
+    <div class="method-cols">
+      <div>
+        <h3>How the numbers are built</h3>
+        <ul>
+          <li>Everyone starts college at 18 and retires at 65. Figures are in constant 2025 dollars, with no inflation or raises beyond the career's own pay curve.</li>
+          <li><strong>Education cost</strong> is published tuition and required fees for every year of school. Living costs are left out, because people pay those in every career.</li>
+          <li><strong>Pay</strong> rises from the starting salary to the peak salary over the listed years, then stays flat. Doctors earn AAMC resident stipends during residency.</li>
+          <li><strong>Loans</strong> are federal Direct Unsubsidized loans at 2025-26 rates: 6.39% for undergraduate years and 7.94% for graduate years. Interest builds through school and residency, and repayment starts at the first full-salary job.</li>
+          <li><strong>Net lifetime earnings</strong> are total pay from 18 to 65, minus tuition paid in cash and every loan payment, including interest.</li>
+          <li><strong>Net earnings to date</strong> on the chart also subtracts the loan balance still owed, so the line starts below zero while debt is outstanding.</li>
+          <li><strong>After tax</strong> applies 2025 federal brackets for a single filer, the standard deduction, Social Security and Medicare, and a flat 5% state tax.</li>
+          <li>Real outcomes vary widely by specialty, firm, city and school. Treat each line as a typical path, not a forecast. New federal borrowing caps for professional students begin in July 2026 and are not modeled here.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Sources</h3>
+        <ol id="sources" class="sources"></ol>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">Salary and tuition figures from the sources listed above.</footer>
+</div>
+
+<script src="data.js"></script>
+<script src="model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
